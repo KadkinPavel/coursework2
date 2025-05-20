@@ -5,6 +5,11 @@ class JobAPI(ABC):
     """Абстрактный класс для работы с API"""
 
     @abstractmethod
+    def _connect_to_api(self, url: str, params: dict):
+        """Приватный метод подключения к API"""
+        pass
+
+    @abstractmethod
     def get_vacancies(self, query):
         """Метод для получения списка вакансий по запросу"""
         pass
@@ -13,20 +18,38 @@ class JobAPI(ABC):
 class HeadHunterAPI(JobAPI):
     """Класс для работы с API HeadHunter (hh.ru)"""
 
-    URL = 'https://api.hh.ru/vacancies'
 
-    def get_vacancies(self, query):
+    def __init__(self):
+        self._URL = 'https://api.hh.ru/vacancies'
+        self._per_page = 15
+
+
+    def _connect_to_api(self, url: str, params: dict):
+        """Приватный метод подключения к API"""
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            return response
+        except requests.RequestException as e:
+            print(f"Ошибка подключения: {e}")
+            return None
+
+
+    def get_vacancies(self, query: str):
         """Получает вакансии с hh.ru по указанному запросу"""
         params = {
             'text': query,  # Ключевое слово для поиска
-            'per_page': 15  # Количество вакансий на одной странице
+            'per_page': self._per_page # Количество вакансий на одной странице
         }
 
-        try:
-            response = requests.get(self.URL, params=params)
-            response.raise_for_status()  # Проверка на успешный статус ответа
-            vacancies = response.json().get('items', [])
-            return vacancies
-        except requests.RequestException as e:
-            print(f"Ошибка при подключении к API hh.ru: {e}")
-            return []
+        # Используем приватный метод подключения
+        response = self._connect_to_api(self._URL, params)
+
+        if response:
+            return response.json().get('items', [])
+        return []
+
+
+
+
+
