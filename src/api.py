@@ -51,5 +51,3 @@ class HeadHunterAPI(JobAPI):
 
 
 
-
-
