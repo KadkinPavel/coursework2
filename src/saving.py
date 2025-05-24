@@ -1,6 +1,24 @@
 import json
+from abc import ABC, abstractmethod
 
-class JSONSaver:
+
+class BaseSaver(ABC):
+    """Абстрактный базовый класс для работы с вакансиями"""
+
+    @abstractmethod
+    def add_vacancy(self, vacancy):
+        pass
+
+    @abstractmethod
+    def get_vacancies(self):
+        pass
+
+    @abstractmethod
+    def delete_vacancy(self, vacancy_name):
+        pass
+
+
+class JSONSaver(BaseSaver):
     def __init__(self, file_name='vacancies.json'):
         self._file_name = file_name
 

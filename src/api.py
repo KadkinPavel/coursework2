@@ -18,36 +18,31 @@ class JobAPI(ABC):
 class HeadHunterAPI(JobAPI):
     """Класс для работы с API HeadHunter (hh.ru)"""
 
-
     def __init__(self):
         self._URL = 'https://api.hh.ru/vacancies'
         self._per_page = 15
-
 
     def _connect_to_api(self, url: str, params: dict):
         """Приватный метод подключения к API"""
         try:
             response = requests.get(url, params=params)
-            response.raise_for_status()
+            response.raise_for_status()  # Вызовет исключение при статусе 4xx/5xx
             return response
         except requests.RequestException as e:
             print(f"Ошибка подключения: {e}")
             return None
 
-
     def get_vacancies(self, query: str):
         """Получает вакансии с hh.ru по указанному запросу"""
         params = {
-            'text': query,  # Ключевое слово для поиска
-            'per_page': self._per_page # Количество вакансий на одной странице
+            'text': query,
+            'per_page': self._per_page
         }
 
-        # Используем приватный метод подключения
         response = self._connect_to_api(self._URL, params)
 
-        if response:
-            return response.json().get('items', [])
-        return []
+        # Если response == None (ошибка подключения) или статус не 200
+        if not response or response.status_code != 200:
+            return []  # Возвращаем пустой список, как требует тест
 
-
-
+        return response.json().get('items', [])
